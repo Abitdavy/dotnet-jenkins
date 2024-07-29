@@ -1,0 +1,6 @@
+@dotnet_jenkins_HostAddress = http://localhost:5285
+
+GET {{dotnet_jenkins_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
