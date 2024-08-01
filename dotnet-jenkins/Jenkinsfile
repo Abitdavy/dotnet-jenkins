@@ -8,9 +8,15 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
+                    // Ensure the workspace is clean
+                    sh 'rm -rf dotnet-jenkins || true'
+                    
+                    // Clone the repository securely
                     withCredentials([string(credentialsId: 'github-secret-token', variable: 'GITHUB_TOKEN')]) {
-                        sh "git clone https://${GITHUB_TOKEN}@github.com/Abitdavy/dotnet-jenkins.git ."
-                        sh "cd dotnet-jenkins"
+                        sh '''
+                            git clone https://${GITHUB_TOKEN}@github.com/Abitdavy/dotnet-jenkins.git
+                            cd dotnet-jenkins
+                        '''
                     }
                 }
             }
@@ -18,6 +24,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
+                    // Build the Docker image
                     docker.build("${env.DOCKER_IMAGE}:${env.BUILD_NUMBER}", "dotnet-jenkins")
                 }
             }
@@ -25,6 +32,7 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
+                    // Run the Docker container
                     docker.image("${env.DOCKER_IMAGE}:${env.BUILD_NUMBER}").run('-d -p 8081:80')
                 }
             }
