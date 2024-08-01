@@ -8,8 +8,13 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'github-secret-token', variable: 'GITHUB_TOKEN')]) {
-                        sh "git clone https://${GITHUB_TOKEN}@${GITHUB_REPO} ."
+                    withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+                        sh '''
+                            git config --global credential.helper store
+                            echo "https://${GITHUB_TOKEN}:@github.com" > ~/.git-credentials
+                            git clone https://github.com/Abitdavy/dotnet-jenkins.git .
+                            cd dotnet-jenkins
+                        '''
                     }
                 }
             }
@@ -17,7 +22,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${env.DOCKER_IMAGE}:${env.BUILD_NUMBER}")
+                    docker.build("${env.DOCKER_IMAGE}:${env.BUILD_NUMBER}", "dotnet-jenkins")
                 }
             }
         }
